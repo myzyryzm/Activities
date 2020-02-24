@@ -1,9 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +25,7 @@ namespace API
                     var context = services.GetRequiredService<DataContext>();
                     //applies any pending migrations and will create a databse if it aint there
                     context.Database.Migrate();
+                    Seed.SeedData(context);
                 }
                 catch (Exception ex)
                 {
@@ -48,3 +45,19 @@ namespace API
                 });
     }
 }
+
+
+//CQRS
+//Commands use write database
+//queries use read database
+//will be using read a lot more
+//this allows us to separate each of the databases for an increase in performance (can be faster)
+//however the databases do not update at the same time so it could lead to query database not being as up to date as the command database
+//we r using event store to keep it up to date (read db)
+//keep track of what events happened rather than directly writing to database () 
+//pros ==> scalability flexibility event sourcing
+//can allocate our reads 
+//cons ==> more complex; does not modify state (so relational databases cant be used); event sourcing costs
+//HOWEVER WE ARENT USING AN EVENT STORE
+//mediatR takes object in handles it and then object out
+//API controller uses Mediator.send and pass in the object; mediater will handle it and then ouput a new object
