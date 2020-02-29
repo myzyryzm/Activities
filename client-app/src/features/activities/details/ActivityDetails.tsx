@@ -11,6 +11,8 @@ import ActivityDetailedInfo from './ActivityDetailedInfo'
 import ActivityDetailedChat from './ActivityDetailedChat'
 import ActivityDetailedSidebar from './ActivityDetailedSidebar'
 
+//need to specify that id is a string so match.params.id is a string
+//pass it is as a type to the RouteComponentProps
 interface DetailParams {
     id: string
 }
@@ -23,6 +25,7 @@ const ActivityDetails: React.FC<RouteComponentProps<DetailParams>> = ({
     const { activity, loadActivity, loadingInitial } = activityStore
 
     useEffect(() => {
+        //.id refers to :id in path of route
         loadActivity(match.params.id)
     }, [loadActivity, match.params.id, history])
 

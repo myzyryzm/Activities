@@ -6,8 +6,17 @@ using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 //receive HTTP requests and send back HTTP responses
+//dotnet ef database drop -p Persistence/ -s API/ to reset database
 namespace API.Controllers 
 {
+    //boxing makes a copy of the value type
+    //boxing is converting a value type to an object by putting it on the garbage collected heap; unboxing is converting an object to a value type (i.e. taking it off the heap and putting it on the stack)
+    //generics remove the possibility of boxing and unboxing
+    //boxing -> putting value type on heap; unboxing -> taking obj off heap and putting it on stack
+    //value types => struct, int, bool, char, float, enum ; contains an instance of that type
+    //when you pass these into functions they do not change
+    //reference => class, interface, string, obj ; contains a reference to an instance of the type
+    //if you copy a reference variable and then change the copy, the original reference will be mutated too
     [Route ("api/[controller]")]
     [ApiController]
     public class ActivitiesController : ControllerBase 
@@ -28,6 +37,9 @@ namespace API.Controllers
         public async Task<ActionResult<Activity>> Details(Guid id)
         {
             //_mediator is sending a new Details Query class with a specified Id equal to the Id we send in the api request
+            //mediator is added to the the services collection so it is accessible from all classes
+            //we added an assembly of handlers (of type IRequestHandler) when we added the mediator to the services collection
+            //when we send we passed in a class of IRequest
             return await _mediator.Send(new Details.Query{Id = id});
         }
         //unit is just like an empty object

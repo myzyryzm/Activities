@@ -1,5 +1,5 @@
 using System;
-
+//data annotations can be used here to 
 namespace Domain
 {
     public class Activity

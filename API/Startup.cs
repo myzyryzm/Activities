@@ -9,6 +9,9 @@ using MediatR;
 using Application.Activities;
 using FluentValidation.AspNetCore;
 using API.Middleware;
+using Domain;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace API
 {
@@ -57,6 +60,29 @@ namespace API
             {
                 cfg.RegisterValidatorsFromAssemblyContaining<Create>();
             });
+            // services.AddHttpContextAccessor();
+            // services.TryAddScoped<IUserValidator<AppUser>, UserValidator<AppUser>>();
+            // services.TryAddScoped<IPasswordValidator<AppUser>, PasswordValidator<AppUser>>();
+            // services.TryAddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
+            // services.TryAddScoped<ILookupNormalizer, UpperInvariantLookupNormalizer>();
+            // services.TryAddScoped<IRoleValidator<IdentityRole>, RoleValidator<IdentityRole>>();
+            // services.TryAddScoped<IdentityErrorDescriber>();
+            // services.TryAddScoped<ISecurityStampValidator, SecurityStampValidator<AppUser>>();
+            // services.TryAddScoped<ITwoFactorSecurityStampValidator, TwoFactorSecurityStampValidator<AppUser>>();
+            // services.TryAddScoped<IUserClaimsPrincipalFactory<AppUser>, UserClaimsPrincipalFactory<AppUser, IdentityRole>>();
+            // services.TryAddScoped<UserManager<AppUser>>();
+            // services.TryAddScoped<SignInManager<AppUser>>();
+            // services.TryAddScoped<RoleManager<IdentityRole>>();
+            //addIdentity (not aIC) is for MVC pages
+            // var builder = services.AddIdentityCore<AppUser>().AddEntityFrameworkStores<DataContext>();
+            // var identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);
+            // //lets identity builder handle teh users; user manager service comes from AddEntityFrameworkStores
+            // identityBuilder.AddEntityFrameworkStores<DataContext>();
+            // //controls how users can sign in
+            // identityBuilder.AddSignInManager<SignInManager<AppUser>>();
+
+            services.AddDefaultIdentity<AppUser>()
+            .AddEntityFrameworkStores<DataContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -13,7 +13,9 @@ namespace Application.Activities {
         {
             public Guid Id { get; set; }
         }
-
+        //IRequestHandler<in TRequest, TResponse> where TRequest : IRequest<TResponse>
+        //in means that TRequest can only be an input method type (this is called contravariance)
+        //out T2 (which is not used here) would be covariance; this specifies that T2 must be an output of a function 
         public class Handler : IRequestHandler<Query, Activity> {
             private readonly DataContext _context;
             public Handler (DataContext context) 
