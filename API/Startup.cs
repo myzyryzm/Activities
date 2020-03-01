@@ -12,6 +12,13 @@ using API.Middleware;
 using Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Infrastructure.Security;
+using Application.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace API
 {
@@ -21,7 +28,6 @@ namespace API
         {
             Configuration = configuration;
         }
-
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -56,7 +62,12 @@ namespace API
             services.AddMediatR(typeof(List.Handler).Assembly);
             //registering the validators to our service via .AddFluentValidation
             //the RegisterValidators... looks at the create class and looks through the classes it contains and it finds the AbstractValidator class so it knows to scan through the whole project and find any classes that are of the AbstractValidator type
-            services.AddControllers().AddFluentValidation(cfg => 
+            services.AddControllers(opt => 
+            {
+                //any of our requests now require authorization (we override it in UserController so those requests dont require)
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                opt.Filters.Add(new AuthorizeFilter(policy));
+            }).AddFluentValidation(cfg => 
             {
                 cfg.RegisterValidatorsFromAssemblyContaining<Create>();
             });
@@ -83,6 +94,20 @@ namespace API
 
             services.AddDefaultIdentity<AppUser>()
             .AddEntityFrameworkStores<DataContext>();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"]));
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt => 
+            {
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateAudience = false,
+                    ValidateIssuer = false
+                };
+            });
+            //IJWTGenerator and inject it into classes in it; those classes will have access to use the methods
+            services.AddScoped<IJwtGenerator, JwtGenerator>();
+            services.AddScoped<IUserAccessor, UserAccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -100,9 +125,10 @@ namespace API
             // app.UseHttpsRedirection();
             
             app.UseRouting();
-
-            app.UseAuthorization();
             app.UseCors("CorsPolicy");
+
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
