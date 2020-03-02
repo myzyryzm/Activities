@@ -17,6 +17,7 @@ namespace Persistence
         public DbSet<Value> Values { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<UserActivity> UserActivities { get; set; }
+        public DbSet<Photo> Photos {get; set;}
         protected override void OnModelCreating(ModelBuilder builder)
         {
             //allows us when creating our database to give a user a pk
@@ -27,6 +28,7 @@ namespace Persistence
                 new Value {Id=2, Name="Value 102"},
                 new Value {Id=3, Name="Value 103"}
             );
+            //b/c this is a many 2 many relationship (with UserActivity being the middle man) we 
             builder.Entity<UserActivity>(x => x.HasKey(ua => new {ua.AppUserId, ua.ActivityId}));
             builder.Entity<UserActivity>()
                 .HasOne(u => u.AppUser)
