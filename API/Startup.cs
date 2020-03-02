@@ -19,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using AutoMapper;
 
 namespace API
 {
@@ -40,6 +41,7 @@ namespace API
             //it takes in the DataContext u send in (and forces it to have) 
             services.AddDbContext<DataContext>(opt => 
             {
+                opt.UseLazyLoadingProxies();
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
             //need to add CORS
@@ -60,6 +62,8 @@ namespace API
             //here we are adding an assembly of all our handlers
             //if we are using a pattern where the object that is sending a message does not know what is being done with the message then we can say we use a mediator pattern
             services.AddMediatR(typeof(List.Handler).Assembly);
+            //automapper is used for mapping object to object; if we return just regular activities from the server than activitydtos we get in an loop of sort 
+            services.AddAutoMapper(typeof(List.Handler));
             //registering the validators to our service via .AddFluentValidation
             //the RegisterValidators... looks at the create class and looks through the classes it contains and it finds the AbstractValidator class so it knows to scan through the whole project and find any classes that are of the AbstractValidator type
             services.AddControllers(opt => 
@@ -105,6 +109,14 @@ namespace API
                     ValidateIssuer = false
                 };
             });
+            services.AddAuthorization(opt => 
+            {
+                opt.AddPolicy("IsActivityHost", policy => 
+                {
+                    policy.Requirements.Add(new IsHostRequirement());
+                });
+            });
+            services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
             //IJWTGenerator and inject it into classes in it; those classes will have access to use the methods
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IUserAccessor, UserAccessor>();
