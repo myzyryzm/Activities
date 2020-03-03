@@ -42,7 +42,7 @@ const ActivityDetailedSidebar: React.FC<IProps> = ({ attendees }) => {
                             )}
                             <Image
                                 size='tiny'
-                                src={'/assets/user.png' || attendee.image}
+                                src={attendee.image || '/assets/user.png'}
                             />
                             <Item.Content verticalAlign='middle'>
                                 <Item.Header as='h3'>

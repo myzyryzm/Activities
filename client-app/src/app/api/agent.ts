@@ -5,6 +5,7 @@ import { IActivity } from '../models/activity'
 import { history } from '../..'
 import { toast } from 'react-toastify'
 import { IUser, IUserFormValues } from '../models/user'
+import { IProfile, IPhoto, IProfileFormValues } from '../models/profile'
 
 axios.defaults.baseURL = 'http://localhost:5000/api'
 
@@ -39,6 +40,7 @@ axios.interceptors.response.use(undefined, error => {
     }
     throw error.response
 })
+
 const responseBody = (response: AxiosResponse) => response.data
 
 const sleep = (ms: number) => (response: AxiosResponse) =>
@@ -66,7 +68,16 @@ const requests = {
         axios
             .delete(url)
             .then(sleep(1000))
+            .then(responseBody),
+    postForm: (url: string, file: Blob) => {
+        let formData = new FormData()
+        formData.append('File', file)
+        return axios
+            .post(url, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
             .then(responseBody)
+    }
 }
 
 const Activities = {
@@ -83,12 +94,27 @@ const Activities = {
 const User = {
     current: (): Promise<IUser> => requests.get('/user'),
     login: (user: IUserFormValues): Promise<IUser> =>
-        requests.post('/user/login', user),
+        requests.post(`/user/login`, user),
     register: (user: IUserFormValues): Promise<IUser> =>
-        requests.post('/user/register', user)
+        requests.post(`/user/register`, user)
+}
+
+const Profiles = {
+    get: (username: string): Promise<IProfile> =>
+        requests.get(`/profiles/${username}`),
+    uploadPhoto: (photo: Blob): Promise<IPhoto> =>
+        requests.postForm(`/photos`, photo),
+    setMainPhoto: (id: string) => requests.post(`/photos/${id}/setMain`, {}),
+    deletePhoto: (id: string) => requests.del(`/photos/${id}`),
+    update: (profile: IProfileFormValues) =>
+        requests.put(`/profiles/${profile.username}`, {
+            displayName: profile.displayName,
+            bio: profile.bio
+        })
 }
 
 export default {
     Activities,
-    User
+    User,
+    Profiles
 }

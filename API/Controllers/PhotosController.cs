@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Application.Photos;
 using Domain;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -10,9 +11,9 @@ namespace API.Controllers
     {
         //FromForm tells it where to look (we use form-data in postman)
         [HttpPost]
-        public async Task<ActionResult<Photo>> Add([FromForm]Add.Command command)
+        public async Task<ActionResult<Photo>> Add([FromForm] IFormFile File)
         {
-            return await Mediator.Send(command);
+            return await Mediator.Send(new Add.Command{File=File});
         }
 
         [HttpDelete("{id}")]
